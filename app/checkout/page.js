@@ -1,33 +1,51 @@
 "use client";
+// ============================================================
+// checkout/page.js — afrekenen (F9) en de orderbevestiging (F13)
+// ============================================================
+// Deze pagina heeft drie "gezichten", van onder naar boven in de code:
+//   1. het afrekenformulier (de normale situatie)
+//   2. een melding als de mand leeg is
+//   3. de bevestigingspagina na een geslaagde bestelling
+//
+// Bij "Bestellen" sturen we de mand + klantgegevens als JSON naar
+// onze eigen API (/api/orders). Die slaat alles op in MySQL en
+// stuurt het unieke ordernummer terug.
 
 import { useState } from "react";
 import Link from "next/link";
 import { useShop } from "@/components/ShopProvider";
 import Price from "@/components/Price";
 
-// Afrekenen (F9) + orderbevestiging met uniek ordernummer (F13)
 export default function CheckoutPage() {
     const { cart, cartTotal, discount, clearCart } = useShop();
 
+    // De ingevulde klantgegevens (elk veld gekoppeld aan een input)
     const [form, setForm] = useState({
         first_name: "", last_name: "", email: "",
         address: "", postal_code: "", city: "", country: "",
     });
-    const [error, setError] = useState("");
-    const [busy, setBusy] = useState(false);
-    const [confirmation, setConfirmation] = useState(null);
+    const [error, setError] = useState("");        // foutmelding van de server
+    const [busy, setBusy] = useState(false);       // true tijdens het versturen
+    const [confirmation, setConfirmation] = useState(null); // orderdata na succes
 
+    // Bedragen voor het overzichtje onder het formulier
     const discountAmount = discount ? cartTotal * discount.percent : 0;
     const newTotal = cartTotal - discountAmount;
 
+    /**
+     * Hulpfunctie die een onChange-handler maakt voor één veld.
+     * set("city") geeft een functie terug die form.city bijwerkt.
+     * Scheelt zeven bijna identieke handlers.
+     */
     function set(field) {
         return (e) => setForm({ ...form, [field]: e.target.value });
     }
 
+    /** Klik op "Bestellen": alles naar de API sturen (F9). */
     async function handleSubmit(e) {
-        e.preventDefault();
+        e.preventDefault(); // browser niet zelf laten submitten
         setError("");
-        setBusy(true);
+        setBusy(true); // knop uitschakelen tegen dubbel klikken
 
         try {
             const res = await fetch("/api/orders", {
@@ -36,6 +54,8 @@ export default function CheckoutPage() {
                 body: JSON.stringify({
                     customer: form,
                     discountCode: discount?.code ?? "",
+                    // Alleen de essentie meesturen; prijzen zoekt de
+                    // server zélf op in de database (veiliger)
                     items: cart.map((it) => ({
                         id: it.id,
                         size: it.size,
@@ -47,11 +67,13 @@ export default function CheckoutPage() {
 
             const data = await res.json();
             if (!res.ok) {
+                // Server zei nee (bijv. veld leeg of product bestaat niet meer)
                 setError(data.error || "Er ging iets mis bij het bestellen.");
                 return;
             }
 
-            // Bevestiging bewaren en mand leegmaken
+            // Gelukt! Bevestiging bewaren en de mand leegmaken.
+            // (eerst bewaren, anders is de data weg voor het tonen)
             setConfirmation({ ...data, firstName: form.first_name });
             clearCart();
         } catch {
@@ -61,7 +83,7 @@ export default function CheckoutPage() {
         }
     }
 
-    /* ============== Bevestigingspagina na succesvolle bestelling (F13) ============== */
+    /* ============== 3. Bevestigingspagina na succesvolle bestelling (F13) ============== */
     if (confirmation) {
         return (
             <div className="box">
@@ -77,6 +99,7 @@ export default function CheckoutPage() {
 
                 <hr />
 
+                {/* Overzicht van wat er besteld is */}
                 <h3>Overzicht van je bestelling:</h3>
                 <table className="table">
                     <thead>
@@ -100,6 +123,7 @@ export default function CheckoutPage() {
                     </tbody>
                 </table>
 
+                {/* Totaal betaald, met kortingsregels indien van toepassing */}
                 <div className="total">
                     {confirmation.discountAmount > 0 && (
                         <>
@@ -115,7 +139,7 @@ export default function CheckoutPage() {
         );
     }
 
-    /* ============== Lege mand ============== */
+    /* ============== 2. Lege mand: niks om af te rekenen ============== */
     if (cart.length === 0) {
         return (
             <div className="box">
@@ -126,14 +150,16 @@ export default function CheckoutPage() {
         );
     }
 
-    /* ============== Afrekenformulier ============== */
+    /* ============== 1. Het afrekenformulier ============== */
     return (
         <div className="box">
             <h2>Afrekenen</h2>
 
+            {/* Foutmelding van de server, als die er is */}
             {error && <p className="error">❌ {error}</p>}
 
             <form onSubmit={handleSubmit}>
+                {/* Naam */}
                 <div className="row">
                     <input className="input" placeholder="Voornaam" required
                         value={form.first_name} onChange={set("first_name")} />
@@ -141,11 +167,13 @@ export default function CheckoutPage() {
                         value={form.last_name} onChange={set("last_name")} />
                 </div>
 
+                {/* E-mail (type="email" laat de browser het formaat checken) */}
                 <div className="row" style={{ marginTop: 8 }}>
                     <input className="input" type="email" placeholder="E-mail" required
                         value={form.email} onChange={set("email")} />
                 </div>
 
+                {/* Adres + postcode */}
                 <div className="row" style={{ marginTop: 8 }}>
                     <input className="input" placeholder="Adres" required
                         value={form.address} onChange={set("address")} />
@@ -153,6 +181,7 @@ export default function CheckoutPage() {
                         value={form.postal_code} onChange={set("postal_code")} />
                 </div>
 
+                {/* Stad + land */}
                 <div className="row" style={{ marginTop: 8 }}>
                     <input className="input" placeholder="Stad" required
                         value={form.city} onChange={set("city")} />
@@ -171,6 +200,7 @@ export default function CheckoutPage() {
                     <strong>Totaal: <Price amount={newTotal} /></strong>
                 </div>
 
+                {/* disabled tijdens het versturen: voorkomt dubbele bestellingen */}
                 <button className="btn" type="submit" disabled={busy}>
                     {busy ? "Bezig..." : "Bestellen"}
                 </button>

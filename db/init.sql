@@ -1,9 +1,23 @@
--- Database voor Turkse Voetbalshop 2
+-- ============================================================
+-- init.sql — database, tabellen en testdata voor de shop
+-- ============================================================
+-- Wordt gedraaid door: npm run setup-db (zie scripts/setup-db.js)
+--
+-- Tabellenoverzicht:
+--   products          de shirts (naam, prijs, club, foto, omschrijving)
+--   product_variants  voorraad per maat (elk shirt heeft 5 rijen: S t/m XXL)
+--   orders            geplaatste bestellingen (klantgegevens + totaal)
+--   order_items       de regels van een bestelling (welk shirt, maat, aantal)
+
+-- utf8mb4 zodat Turkse tekens (ş, ğ, ç) goed opgeslagen worden
 CREATE DATABASE IF NOT EXISTS voetbalshop2
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE voetbalshop2;
 
+-- Oude tabellen weggooien zodat dit script opnieuw te draaien is.
+-- Volgorde is belangrijk: eerst de tabellen die naar andere verwijzen
+-- (foreign keys), anders weigert MySQL het DROP-en.
 DROP TABLE IF EXISTS order_items;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS product_variants;
@@ -19,13 +33,15 @@ CREATE TABLE products (
     description TEXT
 );
 
+-- Voorraad per maat. FOREIGN KEY koppelt elke rij aan een product;
+-- ON DELETE CASCADE = gooi je een product weg, dan gaan de maten mee.
 CREATE TABLE product_variants (
     id INT AUTO_INCREMENT PRIMARY KEY,
     product_id INT NOT NULL,
     size ENUM('S', 'M', 'L', 'XL', 'XXL') NOT NULL,
     stock INT NOT NULL DEFAULT 0,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-    UNIQUE KEY uniq_product_size (product_id, size)
+    UNIQUE KEY uniq_product_size (product_id, size) -- zelfde maat kan niet 2x bij 1 product
 );
 
 CREATE TABLE orders (
@@ -78,6 +94,9 @@ INSERT INTO products (name, price, club, color, image, description) VALUES
 ('Adana Demirspor Thuisshirt 24/25', 74.99, 'Adana Demirspor', 'lichtblauw-donkerblauw', 'adanademirspor.png',
  'Het officiële thuisshirt van Adana Demirspor voor seizoen 24/25. Opvallend lichtblauw design van de Blauwe Bliksem.');
 
+-- Voorraad: elk product krijgt alle 5 maten met een startvoorraad.
+-- "INSERT ... SELECT id, ... FROM products" maakt in één keer een
+-- rij voor élk product, zonder alle id's uit te hoeven typen.
 INSERT INTO product_variants (product_id, size, stock)
 SELECT id, 'S', 10 FROM products;
 

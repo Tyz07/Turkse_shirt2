@@ -1,23 +1,37 @@
 "use client";
+// ============================================================
+// AddToCartForm.js — het formulier onder elk product
+// ============================================================
+// Hiermee kiest de gebruiker een maat (F5), zet eventueel een
+// naam op het shirt (F6) en stopt het product in de mand (F7).
+// Wordt op twee plekken gebruikt: op de productkaartjes (home)
+// én op de productdetailpagina.
 
 import { useState } from "react";
 import { useShop } from "@/components/ShopProvider";
 
-// Formulier: maat kiezen (F5), naam op shirt (F6), aantal en toevoegen aan mand (F7)
+/**
+ * @param {Object} props
+ * @param {{id:number, name:string, price:number|string, image:string}} props.product
+ * @param {string[]} props.sizes - Alleen maten die op voorraad zijn (bijv. ["S","M","L"])
+ */
 export default function AddToCartForm({ product, sizes }) {
     const { addToCart } = useShop();
-    const [size, setSize] = useState("");
-    const [customName, setCustomName] = useState("");
-    const [qty, setQty] = useState(1);
-    const [added, setAdded] = useState(false);
 
+    // Lokale state: wat er nu in dít formulier is ingevuld
+    const [size, setSize] = useState("");           // gekozen maat ("" = nog niks)
+    const [customName, setCustomName] = useState(""); // naam op het shirt
+    const [qty, setQty] = useState(1);               // aantal
+    const [added, setAdded] = useState(false);       // net toegevoegd? (voor de knoptekst)
+
+    /** Wordt aangeroepen bij klikken op "In mand". */
     function handleSubmit(e) {
-        e.preventDefault();
-        if (!size) return;
+        e.preventDefault(); // voorkom dat de browser de pagina herlaadt
+        if (!size) return;  // geen maat gekozen -> niks doen (select is ook 'required')
 
         addToCart(product, size, customName.trim(), Math.max(1, qty));
 
-        // korte bevestiging tonen op de knop
+        // Knop verandert 1,5 seconde in "✓ Toegevoegd" als bevestiging
         setAdded(true);
         setTimeout(() => setAdded(false), 1500);
     }
@@ -25,6 +39,7 @@ export default function AddToCartForm({ product, sizes }) {
     return (
         <form onSubmit={handleSubmit}>
             <div className="row">
+                {/* Maat kiezen (F5) — alleen maten met voorraad staan erin */}
                 <select
                     className="input"
                     value={size}
@@ -37,6 +52,7 @@ export default function AddToCartForm({ product, sizes }) {
                     ))}
                 </select>
 
+                {/* Naam op het shirt (F6), mag leeg blijven */}
                 <input
                     className="input"
                     type="text"
@@ -46,6 +62,7 @@ export default function AddToCartForm({ product, sizes }) {
                     onChange={(e) => setCustomName(e.target.value)}
                 />
 
+                {/* Aantal */}
                 <input
                     className="input qty"
                     type="number"
@@ -54,6 +71,7 @@ export default function AddToCartForm({ product, sizes }) {
                     onChange={(e) => setQty(Number(e.target.value))}
                 />
 
+                {/* Toevoegen aan de mand (F7) */}
                 <button className="btn" type="submit">
                     {added ? "✓ Toegevoegd" : "In mand"}
                 </button>
