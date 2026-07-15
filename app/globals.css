@@ -1,0 +1,230 @@
+* { box-sizing: border-box }
+
+/* Kleuren en fonts van de shop */
+:root {
+  --rood: #e30a17;         /* Turks vlagrood */
+  --rood-donker: #b00812;
+  --donker: #14181d;       /* header / footer / donkere knoppen */
+  --donker-2: #222933;
+  --bg: #f6f6f4;           /* warm gebroken wit */
+  --lijn: #e5e3df;
+  --tekst: #17191c;
+  --gedempt: #6b7280;
+}
+
+/* Basis */
+html, body { margin: 0; padding: 0 }
+body {
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--tekst);
+}
+
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px }
+
+a { color: inherit }
+
+/* Koppen in het sportieve condensed font */
+h1, h2, h3, .logo {
+  font-family: var(--font-heading, "Arial Narrow"), Arial, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+/* Header: donkere balk met rood accent */
+.hdr {
+  position: sticky; top: 0;
+  background: var(--donker);
+  border-bottom: 3px solid var(--rood);
+  z-index: 10;
+}
+.hdr .wrap {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+}
+.logo {
+  font-weight: 700; font-size: 22px;
+  color: #ffffff; text-decoration: none;
+}
+.logo::before {
+  content: "";
+  display: inline-block;
+  width: 12px; height: 12px;
+  background: var(--rood);
+  margin-right: 8px;
+  transform: rotate(45deg);
+}
+nav { margin-left: auto }
+nav a { color: #c7ccd4; text-decoration: none; margin-left: 18px; font-size: 15px }
+nav a:hover { color: #ffffff }
+
+/* Valuta-switch (€ / ₺) */
+.currency-switch { display: flex; gap: 6px }
+.currency-switch button {
+  background: transparent;
+  border: 1px solid #3a424d;
+  border-radius: 6px;
+  padding: 5px 11px;
+  font-weight: bold;
+  color: #c7ccd4;
+  cursor: pointer;
+}
+.currency-switch button:hover { border-color: #6b7280; color: #ffffff }
+.currency-switch button.active {
+  background: var(--rood); border-color: var(--rood); color: #ffffff;
+}
+
+/* Hero: rood met subtiele diagonale banen */
+.hero {
+  background:
+    repeating-linear-gradient(-45deg, rgba(255,255,255,.05) 0 14px, transparent 14px 28px),
+    linear-gradient(120deg, var(--rood) 0%, #8f0710 100%);
+  color: #ffffff;
+}
+.hero .wrap { padding: 44px 16px }
+.hero h1 { margin: 0 0 6px 0; font-size: 42px; letter-spacing: 1px; color: #ffffff }
+.hero p  { margin: 0; color: rgba(255,255,255,.85) }
+
+/* Grid & Cards */
+.grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px; margin: 22px 0;
+}
+.card {
+  background: #ffffff;
+  border: 1px solid var(--lijn);
+  border-radius: 10px; overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 1px 3px rgba(20,24,29,.06);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(20,24,29,.12);
+}
+.card-img { position: relative; background: #fff }
+.card-img img { width: 100%; height: 180px; object-fit: cover; display: block }
+.card .p { padding: 14px }
+.card h3 { margin: 8px 0 4px; font-size: 17px }
+.card h3 a { text-decoration: none }
+.card h3 a:hover { color: var(--rood) }
+
+/* Hartje op de kaart (verlanglijst) */
+.wish-btn {
+  position: absolute; top: 8px; right: 8px;
+  width: 34px; height: 34px;
+  border: 1px solid var(--lijn); border-radius: 999px;
+  background: rgba(255,255,255,.92);
+  font-size: 18px; line-height: 1;
+  color: var(--rood);
+  cursor: pointer;
+}
+.wish-btn:hover { background: #ffffff; border-color: var(--rood) }
+.wish-btn.active { background: var(--rood); border-color: var(--rood); color: #ffffff }
+
+/* Club-badge */
+.badge {
+  display: inline-block; padding: 4px 9px;
+  background: #fdeaec;                 /* licht rood */
+  border: 1px solid #f5b5ba;
+  border-radius: 999px; font-size: 12px; font-weight: 600;
+  color: var(--rood-donker);
+}
+
+.price { font-weight: 800; margin: 8px 0; color: var(--rood-donker); font-size: 17px }
+
+/* Layout helpers */
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center }
+.filter-row .grow2 { flex: 2 }
+.filter-row .grow1 { flex: 1 }
+
+/* Inputs & Selects */
+.input, select {
+  background: #ffffff;
+  border: 1px solid #d6d3cd;
+  color: var(--tekst);
+  border-radius: 8px; padding: 10px; width: 100%;
+}
+.input:focus, select:focus {
+  outline: none; border-color: var(--rood);
+  box-shadow: 0 0 0 3px rgba(227,10,23,.12);
+}
+.input.qty { max-width: 90px }
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  background: var(--rood);
+  border: none; color: #ffffff;
+  border-radius: 8px; padding: 10px 16px; cursor: pointer;
+  font-size: 14px; font-weight: 600;
+  text-decoration: none; text-align: center;
+}
+.btn:hover { background: var(--rood-donker) }
+
+.btn.alt {
+  background: var(--donker);
+  color: #ffffff;
+}
+.btn.alt:hover { background: var(--donker-2) }
+
+.btn.small { padding: 6px 10px; font-size: 13px }
+
+/* Tabellen */
+.table { width: 100%; border-collapse: collapse }
+th, td {
+  padding: 10px; border-bottom: 1px solid var(--lijn); text-align: left; color: var(--tekst);
+}
+th {
+  background: #f3f2ef;
+  font-family: var(--font-heading, "Arial Narrow"), Arial, sans-serif;
+  text-transform: uppercase; letter-spacing: .5px; font-size: 13px;
+}
+
+/* Boxen */
+.box {
+  background: #ffffff;
+  border: 1px solid var(--lijn);
+  border-radius: 10px; padding: 18px; margin: 18px 0;
+  box-shadow: 0 1px 3px rgba(20,24,29,.06);
+}
+
+/* Totaal */
+.total { text-align: right; font-weight: 800; color: var(--tekst); margin: 12px 0 }
+.total p { margin: 4px 0; font-weight: normal; color: var(--gedempt) }
+
+/* Footer: donker zoals de header */
+.ftr {
+  background: var(--donker);
+  border-top: 3px solid var(--rood);
+  margin-top: 40px; color: #c7ccd4;
+}
+.ftr .wrap { padding: 22px 16px }
+
+/* Koppen */
+h2 { margin: 10px 0 6px; color: var(--tekst) }
+
+/* Foutmeldingen */
+.error { color: var(--rood-donker) }
+
+/* Productdetail */
+.detail { display: flex; gap: 24px; flex-wrap: wrap; margin: 22px 0 }
+.detail-img { flex: 1; min-width: 280px; position: relative }
+.detail-img img {
+  width: 100%; border-radius: 10px; border: 1px solid var(--lijn);
+  background: #ffffff;
+}
+.detail-info { flex: 1.2; min-width: 300px }
+.detail-info .price { font-size: 26px }
+.detail-info .desc { color: #4b5563; line-height: 1.6 }
+.stock-list { list-style: none; padding: 0; margin: 10px 0; color: #4b5563; font-size: 14px }
+.stock-list li { margin: 2px 0 }
+.stock-ok { color: #15803d }
+.stock-out { color: var(--rood-donker) }
+
+.breadcrumb { margin: 18px 0 0; font-size: 14px; color: var(--gedempt) }
+.breadcrumb a { color: var(--gedempt) }
+
+/* Lege staat */
+.empty { color: #4b5563 }
